@@ -73,7 +73,7 @@ background:#10b981;
 <button onclick="register()">Register</button>
 <button onclick="login()">Login</button>
 <button class="google" onclick="googleLogin()">Login with Google</button>
-<button class="google" onclick="microsoftLogin()">Login with Microsoft</button>
+<button class="google" onclick="anonymousLogin()">Login Anonymously</button>
 
 </div>
 
@@ -102,6 +102,19 @@ const firebaseConfig = {
   measurementId: "G-EG78EM4ZZK"
 };firebase.initializeApp(firebaseConfig);
 
+firebase.auth().onAuthStateChanged(user => {
+    if(user){
+        document.getElementById("loginBox").style.display="none";
+        document.getElementById("userBox").style.display="block";
+        document.getElementById("username").innerText = user.isAnonymous 
+            ? "Welcome Anonymous User" 
+            : "Welcome " + user.email;
+    } else {
+        document.getElementById("loginBox").style.display="block";
+        document.getElementById("userBox").style.display="none";
+    }
+});
+
 function register(){
 let email=emailInput()
 let password=passwordInput()
@@ -124,15 +137,9 @@ var provider=new firebase.auth.GoogleAuthProvider()
 firebase.auth().signInWithPopup(provider)
 }
 
-function microsoftLogin() {
-    var provider = new firebase.auth.OAuthProvider('microsoft.com');
-    firebase.auth().signInWithPopup(provider)
-        .then((result) => {
-            console.log("User logged in:", result.user);
-        })
-        .catch((error) => {
-            alert(error.message);
-        });
+function anonymousLogin(){
+    firebase.auth().signInAnonymously()
+    .catch(e => alert(e.message));
 }
 function logout(){
 firebase.auth().signOut()
