@@ -73,6 +73,7 @@ background:#10b981;
 <button onclick="register()">Register</button>
 <button onclick="login()">Login</button>
 <button class="google" onclick="googleLogin()">Login with Google</button>
+<button class="google" onclick="microsoftLogin()">Login with Microsoft</button>
 
 </div>
 
@@ -118,6 +119,17 @@ function googleLogin(){
 var provider=new firebase.auth.GoogleAuthProvider()
 
 firebase.auth().signInWithPopup(provider)
+}
+
+function microsoftLogin() {
+    var provider = new firebase.auth.OAuthProvider('microsoft.com');
+    firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+            console.log(result.user);
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
 }
 
 function logout(){
