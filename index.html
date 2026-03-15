@@ -128,13 +128,12 @@ function microsoftLogin() {
     var provider = new firebase.auth.OAuthProvider('microsoft.com');
     firebase.auth().signInWithPopup(provider)
         .then((result) => {
-            console.log(result.user);
+            console.log("User logged in:", result.user);
         })
         .catch((error) => {
             alert(error.message);
         });
 }
-
 function logout(){
 firebase.auth().signOut()
 }
