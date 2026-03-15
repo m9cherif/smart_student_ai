@@ -1,77 +1,157 @@
-
+```html
 <!DOCTYPE html>
 <html>
+
 <head>
 <title>Smart Student AI</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.card{
+background:#1e293b;
+padding:40px;
+border-radius:12px;
+width:320px;
+text-align:center;
+}
+
+input{
+width:100%;
+padding:10px;
+margin:8px 0;
+border:none;
+border-radius:6px;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-top:10px;
+border:none;
+border-radius:6px;
+background:#3b82f6;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#2563eb;
+}
+
+.google{
+background:#ef4444;
+}
+
+.logout{
+background:#10b981;
+}
+
+</style>
 </head>
 
 <body>
 
-<h1>Smart Student AI Website Works!</h1>
+<div class="card">
 
-<h2>Login</h2>
+<h2>Smart Student AI</h2>
+
+<div id="loginBox">
 
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
 
 <button onclick="register()">Register</button>
 <button onclick="login()">Login</button>
-<button onclick="googleLogin()">Login with Google</button>
+<button class="google" onclick="googleLogin()">Login with Google</button>
+
+</div>
+
+<div id="userBox" style="display:none">
+
+<h3 id="username"></h3>
+<button class="logout" onclick="logout()">Logout</button>
+
+</div>
+
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 
 <script>
+
 const firebaseConfig = {
-  apiKey: "AIzaSyDzSzUdnba1x2FnuOa-Qee9H5bY52cT3j4",
-  authDomain: "smart-student-ai.firebaseapp.com",
-  projectId: "smart-student-ai",
-  storageBucket: "smart-student-ai.firebasestorage.app",
-  messagingSenderId: "378407423860",
-  appId: "1:378407423860:web:90f99336c2d5bc1996a621",
-  measurementId: "G-EG78EM4ZZK"
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+projectId: "YOUR_PROJECT_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
 
 function register(){
-let email=document.getElementById("email").value
-let password=document.getElementById("password").value
+let email=emailInput()
+let password=passwordInput()
 
 firebase.auth().createUserWithEmailAndPassword(email,password)
-.then(()=>{
-alert("Account created")
-})
-.catch((error)=>{
-alert(error.message)
-})
+.catch(e=>alert(e.message))
 }
 
 function login(){
-let email=document.getElementById("email").value
-let password=document.getElementById("password").value
+let email=emailInput()
+let password=passwordInput()
 
 firebase.auth().signInWithEmailAndPassword(email,password)
-.then(()=>{
-alert("Welcome")
-})
-.catch((error)=>{
-alert(error.message)
-})
+.catch(e=>alert(e.message))
 }
 
 function googleLogin(){
 var provider=new firebase.auth.GoogleAuthProvider()
 
 firebase.auth().signInWithPopup(provider)
-.then((result)=>{
-alert("Welcome "+result.user.displayName)
-})
-.catch((error)=>{
-alert(error.message)
-})
 }
+
+function logout(){
+firebase.auth().signOut()
+}
+
+function emailInput(){
+return document.getElementById("email").value
+}
+
+function passwordInput(){
+return document.getElementById("password").value
+}
+
+firebase.auth().onAuthStateChanged(user=>{
+
+if(user){
+
+document.getElementById("loginBox").style.display="none"
+document.getElementById("userBox").style.display="block"
+
+document.getElementById("username").innerText="Welcome "+user.email
+
+}else{
+
+document.getElementById("loginBox").style.display="block"
+document.getElementById("userBox").style.display="none"
+
+}
+
+})
+
 </script>
 
 </body>
 </html>
+```
