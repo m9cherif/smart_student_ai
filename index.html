@@ -5717,6 +5717,108 @@
             ).call(this);
         </script>
         <script src="https://static-assets.strikinglycdn.com/detectIE-c385c24313ef0e9e4e7a1e131bf5e59f0fbd468f9f9ef44fd6739ae84ef0c0a4.js" async="async"></script>
+        <style>
+            .login-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(15,23,42,0.85);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                padding: 24px;
+            }
+
+            .login-overlay.is-open {
+                display: flex;
+            }
+
+            .login-overlay * {
+                box-sizing: border-box;
+            }
+
+            .login-card {
+                background: #1e293b;
+                color: #ffffff;
+                padding: 32px;
+                border-radius: 12px;
+                width: 100%;
+                max-width: 380px;
+                position: relative;
+                max-height: 90vh;
+                overflow: auto;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+            }
+
+            .login-card h2 {
+                margin: 0 0 16px;
+            }
+
+            .login-card input {
+                width: 100%;
+                padding: 10px;
+                margin: 8px 0;
+                border: none;
+                border-radius: 6px;
+            }
+
+            .login-card button {
+                width: 100%;
+                padding: 10px;
+                margin-top: 10px;
+                border: none;
+                border-radius: 6px;
+                background: #3b82f6;
+                color: white;
+                cursor: pointer;
+            }
+
+            .login-card button:hover {
+                background: #2563eb;
+            }
+
+            .login-card .google {
+                background: #ef4444;
+            }
+
+            .login-card .google:hover {
+                background: #dc2626;
+            }
+
+            .login-card .logout {
+                background: #10b981;
+            }
+
+            .login-card .logout:hover {
+                background: #059669;
+            }
+
+            .login-close {
+                position: absolute;
+                top: 10px;
+                right: 12px;
+                background: transparent;
+                border: 0;
+                color: #ffffff;
+                font-size: 20px;
+                cursor: pointer;
+            }
+
+            .login-iframe-wrap {
+                width: 100%;
+                height: 360px;
+                margin-top: 16px;
+                border: 0;
+            }
+
+            .login-iframe-wrap iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+                border-radius: 8px;
+                background: #0f172a;
+            }
+        </style>
     </head>
     <body class='show rtl-layout locale-ar' data-mobile-new-breakpoint-stage='1' id='user_sites' theme_name='s5-theme'>
         <div class='' data-id='34347298' id='s-page-container'>
@@ -6898,7 +7000,7 @@
                                                         <div class="s-button s-component">
                                                             <div>
                                                                 <div class="s-component-content ">
-                                                                    <a class="s-common-button s-custom-btn css-1dwzau9  s-font-button mobile-automatic pc-small " href="#5" data-is-nav-btn="true" data-type="Section" data-component="button" target="_self">تسجيل الدخول</a>
+                                                                    <a class="s-common-button s-custom-btn css-1dwzau9  s-font-button mobile-automatic pc-small " href="#5" data-login-trigger="true" data-is-nav-btn="true" data-type="Section" data-component="button" target="_self">تسجيل الدخول</a>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -6984,7 +7086,7 @@
                                                         <div class="s-button s-component">
                                                             <div>
                                                                 <div class="s-component-content ">
-                                                                    <a class="s-common-button s-custom-btn css-1dwzau9  s-font-button mobile-automatic pc-small " href="#5" data-is-nav-btn="true" data-type="Section" data-component="button" target="_self">تسجيل الدخول</a>
+                                                                    <a class="s-common-button s-custom-btn css-1dwzau9  s-font-button mobile-automatic pc-small " href="#5" data-login-trigger="true" data-is-nav-btn="true" data-type="Section" data-component="button" target="_self">تسجيل الدخول</a>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -8602,6 +8704,247 @@
                     window.afterBundleLoadHitLandingPageTracking()
                 }
             })
+        </script>
+        <div id="loginOverlay" class="login-overlay" aria-hidden="true">
+            <div class="login-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+                <button class="login-close" type="button" id="loginClose" aria-label="Close">x</button>
+                <h2 id="loginTitle">Smart Student AI</h2>
+                <div id="loginBox">
+                    <input id="email" type="email" placeholder="Email" autocomplete="email">
+                    <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+                    <button type="button" onclick="register()">Register</button>
+                    <button type="button" onclick="login()">Login</button>
+                    <button type="button" class="google" onclick="googleLogin()">Login with Google</button>
+                    <button type="button" class="google" onclick="anonymousLogin()">Login Anonymously</button>
+                </div>
+                <div class="login-iframe-wrap">
+                    <iframe id="loginIframe" title="Smart Student AI" data-src="https://smartstudentai.mystrikingly.com"></iframe>
+                </div>
+                <div id="userBox" style="display:none">
+                    <h3 id="username"></h3>
+                    <button type="button" class="logout" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+        <script>
+            (function() {
+                var overlay = document.getElementById('loginOverlay');
+                if (!overlay) {
+                    return;
+                }
+
+                var loginBox = document.getElementById('loginBox');
+                var userBox = document.getElementById('userBox');
+                var username = document.getElementById('username');
+                var iframe = document.getElementById('loginIframe');
+                var closeBtn = document.getElementById('loginClose');
+                var firebaseReady = false;
+                var firebaseLoading = null;
+                var authListenerAttached = false;
+                var firebaseConfig = {
+                    apiKey: "AIzaSyDzSzUdnba1x2FnuOa-Qee9H5bY52cT3j4",
+                    authDomain: "smart-student-ai.firebaseapp.com",
+                    projectId: "smart-student-ai",
+                    storageBucket: "smart-student-ai.firebasestorage.app",
+                    messagingSenderId: "378407423860",
+                    appId: "1:378407423860:web:90f99336c2d5bc1996a621",
+                    measurementId: "G-EG78EM4ZZK"
+                };
+
+                function openOverlay() {
+                    overlay.classList.add('is-open');
+                    overlay.setAttribute('aria-hidden', 'false');
+                    if (iframe && !iframe.src && iframe.dataset.src) {
+                        iframe.src = iframe.dataset.src;
+                    }
+                    ensureFirebase();
+                    var emailField = document.getElementById('email');
+                    if (emailField) {
+                        emailField.focus();
+                    }
+                }
+
+                function closeOverlay() {
+                    overlay.classList.remove('is-open');
+                    overlay.setAttribute('aria-hidden', 'true');
+                }
+
+                function loadScriptOnce(src) {
+                    return new Promise(function(resolve, reject) {
+                        var existing = document.querySelector('script[data-login-src="' + src + '"]');
+                        if (existing) {
+                            if (existing.dataset.loaded === 'true') {
+                                resolve();
+                            } else {
+                                existing.addEventListener('load', resolve);
+                                existing.addEventListener('error', reject);
+                            }
+                            return;
+                        }
+                        var script = document.createElement('script');
+                        script.async = true;
+                        script.src = src;
+                        script.dataset.loginSrc = src;
+                        script.addEventListener('load', function() {
+                            script.dataset.loaded = 'true';
+                            resolve();
+                        });
+                        script.addEventListener('error', reject);
+                        document.head.appendChild(script);
+                    });
+                }
+
+                function ensureFirebase() {
+                    if (firebaseReady) {
+                        return Promise.resolve();
+                    }
+                    if (firebaseLoading) {
+                        return firebaseLoading;
+                    }
+                    firebaseLoading = loadScriptOnce('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js')
+                        .then(function() {
+                            return loadScriptOnce('https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js');
+                        })
+                        .then(function() {
+                            if (!window.firebase || !firebase.initializeApp) {
+                                throw new Error('Firebase failed to load.');
+                            }
+                            if (!firebase.apps || !firebase.apps.length) {
+                                firebase.initializeApp(firebaseConfig);
+                            }
+                            bindAuthHandlers();
+                            firebaseReady = true;
+                        })
+                        .catch(function(error) {
+                            console.error(error);
+                            firebaseLoading = null;
+                        });
+                    return firebaseLoading;
+                }
+
+                function emailInput() {
+                    var field = document.getElementById('email');
+                    return field ? field.value.trim() : '';
+                }
+
+                function passwordInput() {
+                    var field = document.getElementById('password');
+                    return field ? field.value.trim() : '';
+                }
+
+                function runWithFirebase(action) {
+                    ensureFirebase().then(function() {
+                        if (firebaseReady && window.firebase && firebase.auth) {
+                            action();
+                        } else {
+                            alert('Authentication is still loading. Please try again.');
+                        }
+                    });
+                }
+
+                function bindAuthHandlers() {
+                    window.register = function() {
+                        var email = emailInput();
+                        var password = passwordInput();
+                        if (!email || !password) {
+                            alert('Enter email and password');
+                            return;
+                        }
+                        runWithFirebase(function() {
+                            firebase.auth().createUserWithEmailAndPassword(email, password)
+                                .catch(function(e) {
+                                    alert(e.message);
+                                });
+                        });
+                    };
+
+                    window.login = function() {
+                        var email = emailInput();
+                        var password = passwordInput();
+                        if (!email || !password) {
+                            alert('Enter email and password');
+                            return;
+                        }
+                        runWithFirebase(function() {
+                            firebase.auth().signInWithEmailAndPassword(email, password)
+                                .catch(function(e) {
+                                    alert(e.message);
+                                });
+                        });
+                    };
+
+                    window.googleLogin = function() {
+                        runWithFirebase(function() {
+                            var provider = new firebase.auth.GoogleAuthProvider();
+                            firebase.auth().signInWithPopup(provider)
+                                .catch(function(e) {
+                                    alert(e.message);
+                                });
+                        });
+                    };
+
+                    window.anonymousLogin = function() {
+                        runWithFirebase(function() {
+                            firebase.auth().signInAnonymously()
+                                .catch(function(e) {
+                                    alert(e.message);
+                                });
+                        });
+                    };
+
+                    window.logout = function() {
+                        runWithFirebase(function() {
+                            firebase.auth().signOut();
+                        });
+                    };
+
+                    if (!authListenerAttached) {
+                        firebase.auth().onAuthStateChanged(function(user) {
+                            if (!loginBox || !userBox || !username) {
+                                return;
+                            }
+                            if (user) {
+                                loginBox.style.display = 'none';
+                                userBox.style.display = 'block';
+                                username.innerText = user.isAnonymous ? 'Welcome Anonymous User' : 'Welcome ' + (user.email || 'User');
+                            } else {
+                                loginBox.style.display = 'block';
+                                userBox.style.display = 'none';
+                            }
+                        });
+                        authListenerAttached = true;
+                    }
+                }
+
+                function initTriggers() {
+                    var triggers = document.querySelectorAll('[data-login-trigger="true"]');
+                    for (var i = 0; i < triggers.length; i++) {
+                        triggers[i].addEventListener('click', function(event) {
+                            event.preventDefault();
+                            openOverlay();
+                        });
+                    }
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', closeOverlay);
+                    }
+                    overlay.addEventListener('click', function(event) {
+                        if (event.target === overlay) {
+                            closeOverlay();
+                        }
+                    });
+                    document.addEventListener('keydown', function(event) {
+                        if (event.key === 'Escape') {
+                            closeOverlay();
+                        }
+                    });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initTriggers);
+                } else {
+                    initTriggers();
+                }
+            })();
         </script>
     </body>
 </html>
